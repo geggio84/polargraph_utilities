@@ -1,30 +1,28 @@
 # Project: PG2SVG
-# Makefile created by Dev-C++ 4.9.9.2
+# Makefile created by Dev-C++ 5.11
 
-CPP  = g++.exe
-CC   = gcc.exe
-WINDRES = windres.exe
-RES  = 
-OBJ  = PG2SVG.o $(RES)
-LINKOBJ  = PG2SVG.o $(RES)
-LIBS =  -L"C:/Dev-Cpp/lib" libmsvg/libmsvg.a  
-INCS =  -I"C:/Dev-Cpp/include" 
-CXXINCS =  -I"C:/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"C:/Dev-Cpp/include/c++/3.4.2/backward"  -I"C:/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"C:/Dev-Cpp/include/c++/3.4.2"  -I"C:/Dev-Cpp/include" 
-BIN  = PG2SVG.exe
-CXXFLAGS = $(CXXINCS)  
-CFLAGS = $(INCS)  
-RM = rm -f
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+OBJ      = PG2SVG.o
+LINKOBJ  = PG2SVG.o
+LIBS     = -L"C:/Programmi/Dev-Cpp/MinGW64/lib32" -L"C:/Programmi/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib32" -static-libgcc libmsvg/libmsvg.a -m32
+INCS     = -I"C:/Programmi/Dev-Cpp/MinGW64/include" -I"C:/Programmi/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Programmi/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include"
+CXXINCS  = -I"C:/Programmi/Dev-Cpp/MinGW64/include" -I"C:/Programmi/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Programmi/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Programmi/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++"
+BIN      = PG2SVG.exe
+CXXFLAGS = $(CXXINCS) -m32
+CFLAGS   = $(INCS) -m32
+RM       = rm.exe -f
 
 .PHONY: all all-before all-after clean clean-custom
 
-all: all-before PG2SVG.exe all-after
-
+all: all-before $(BIN) all-after
 
 clean: clean-custom
 	${RM} $(OBJ) $(BIN)
 
 $(BIN): $(OBJ)
-	$(CC) $(LINKOBJ) -o "PG2SVG.exe" $(LIBS)
+	$(CC) $(LINKOBJ) -o $(BIN) $(LIBS)
 
 PG2SVG.o: PG2SVG.c
 	$(CC) -c PG2SVG.c -o PG2SVG.o $(CFLAGS)

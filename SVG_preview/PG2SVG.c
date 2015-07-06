@@ -531,7 +531,7 @@ int main(int argc, char *argv[])
 	}
 	
 mmPerStep = mmPerRev/motorStepsPerRev;
-steps_per_mm = (motorStepsPerRev/mmPerRev)*2; //    // steps per mm on motor strings
+steps_per_mm = (motorStepsPerRev/mmPerRev); //    // steps per mm on motor strings
 		
     /* open file */
     if( (input_file = fopen(argv[i],"r")) == NULL )

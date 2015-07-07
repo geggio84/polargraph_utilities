@@ -62,10 +62,12 @@ MsvgElement *root, *son;
 // FUNCTIONS
 /////////////////////////////////////////////////////////////////////
 void to_cartesian(double *x, double *y, unsigned int Alen, unsigned int Blen);
+int random(int min, int max);
 void setPosition(long targetA, long targetB);
 void setCurrentPosition(long Position , int side);
 int maxDensity(float penSize, int rowSize);
 int scaleDensity(int inDens, int inMax, int outMax);
+void drawScribblePixel(long originA, long originB, int size, int density);
 void drawSquarePixel_command(long originA, long originB, int size, int density);
 long currentPosition(int side);
 int getAutoDrawDirection(long targetA, long targetB, long sourceA, long sourceB);
@@ -89,6 +91,14 @@ void to_cartesian(double *x, double *y, unsigned int Alen, unsigned int Blen)
 	*y = *y - home_y;
 }
 
+//////////////////////////////////////////////////////////////////
+// Return random number from min to max							//
+//////////////////////////////////////////////////////////////////
+int random(int min, int max)
+{
+	int num = rand();
+	return ((num % (max-min)) + min);
+}
 //////////////////////////////////////////////////////////////////
 // Print a line													//
 //////////////////////////////////////////////////////////////////
@@ -286,6 +296,35 @@ void drawSquareWaveAlongB(int waveAmplitude, int waveLength, int totalWaves, int
 			moveB(waveLength);
 		}
 		flipWaveDirection();
+	}
+}
+//////////////////////////////////////////////////////////////////
+// Draw Scribble Pixel											//
+//////////////////////////////////////////////////////////////////
+void drawScribblePixel(long originA, long originB, int size, int density)
+{
+	long lowLimitA = originA-(size/2);
+	long highLimitA = lowLimitA+size;
+	long lowLimitB = originB-(size/2);
+	//long highLimitB = lowLimitB+size;
+	int randA;
+	int randB;
+	int i;
+
+	int inc = 0;
+	int currSize = size;
+
+	changeLength(current_pos[0],current_pos[1]);
+
+	for (i = 0; i <= density; i++)
+	{
+		randA = random(0, currSize);
+		randB = random(0, currSize);
+		changeLength(lowLimitA+randA, lowLimitB+randB);
+
+		lowLimitA-=inc;
+		highLimitA+=inc;
+		currSize+=inc*2;
 	}
 }
 //////////////////////////////////////////////////////////////////
@@ -587,8 +626,8 @@ steps_per_mm = motorStepsPerRev/mmPerRev;		// steps per mm on motor strings
 			}
 			path_exists=true;
 		}
-		// place image pixel
-		else if( (strncmp(line,"C05",3) == 0) || (strncmp(line,"C06",3) == 0) )
+		// Draw Pixel
+		else if(strncmp(line,"C05",3) == 0)
 		{
 			/* obtain the parameters */
 			sscanf(line,"%3s,%d,%d,%d,%d",cmd,&ia,&ib,&size,&shade);
@@ -619,6 +658,41 @@ steps_per_mm = motorStepsPerRev/mmPerRev;		// steps per mm on motor strings
 				strcpy(points,"");
 
 				drawSquarePixel_command(ia, ib, size, shade);
+				MsvgAddAttribute(son, "points", points);
+			}
+		}
+		// Draw Scribble Pixel
+		else if(strncmp(line,"C06",3) == 0)
+		{
+			/* obtain the parameters */
+			sscanf(line,"%3s,%d,%d,%d,%d",cmd,&ia,&ib,&size,&shade);
+			/* convert them to cartesian values */
+			to_cartesian(&x,&y,ia,ib);
+			/* analyze them */
+			if( ia < mina ) mina=ia;
+			if( ia > maxa ) maxa=ia;
+			if( ib < minb ) minb=ib;
+			if( ib > maxb ) maxb=ib;
+			if( x < minx ) minx=x;
+			if( x > maxx ) maxx=x;
+			if( y < miny ) miny=y;
+			if( y > maxy ) maxy=y;
+
+			if(pen_up)
+			{
+				current_pos[0] = ia;
+				current_pos[1] = ib;
+			}
+			else
+			{
+				son = MsvgNewElement(EID_POLYLINE, root);
+				MsvgAddAttribute(son, "stroke", "#000");
+				sprintf( temp_char, "%.2f", penWidth );
+				MsvgAddAttribute(son, "stroke-width", temp_char);
+				MsvgAddAttribute(son, "fill", "none");
+				strcpy(points,"");
+
+				drawScribblePixel(ia, ib, size*1.1, scaleDensity(shade, 255, maxDensity(penWidth, size)));
 				MsvgAddAttribute(son, "points", points);
 			}
 		}
